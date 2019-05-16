@@ -16,13 +16,15 @@ app.use(function (req, res, next) {
   next();
 });
 
+//Set root directory
+app.use(express.static('public'));
+
 app.listen(5000, function() {
   console.log('Listening on port 5000');
 })
 
 app.post('/submit', submissionScript);
 app.get('/status', statusScript);
-app.get('/output', outputScript);
 
 function submissionScript(req, res) {
   
@@ -56,21 +58,18 @@ function statusScript(req, res) {
     } else {
       status = 'complete';
     }
-    return res.status(200).send({
-      status: status,
-    });
+    if (status === 'complete') {
+      return res.status(200).send({
+        status: status,
+        tiffp: 'temp.tif',
+        jpgfp: 'temp.jpg',
+        bounds: [[40.2417878, -85.1525964], [40.2471212, -85.1475061]],
+      });
+    } else {
+       return res.status(200).send({
+        status: status,
+      });
+    }
   }  
 }
 
-function outputScript(req, res) {
-  
-  if (!req.query.id) {
-    return res.status(400).send({
-      message: 'A request ID is required.'
-    })
-  } else {
-    return res.status(200).send({
-      id: requestID,
-    });
-  }  
-}
