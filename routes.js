@@ -30,6 +30,14 @@ module.exports = (app) => {
       
           //Was there an error while saving?
           if (!err) {
+            var spawn = require("child_process").spawn;
+            var process = spawn('python', 
+              ['./scripts/apicall.py', req.query.id], 
+              {
+                detached: true,
+                stdio:'ignore' 
+              }
+            );
        
             //Send email to user.
             emailUser(req.body.email, taskID);
@@ -74,14 +82,7 @@ module.exports = (app) => {
 
       //Is the taskID a string?
       if (typeof req.query.id === 'string') {
-        //Start Python process
-        console.log('Running')
-        var spawn = require("child_process").spawn;
-        var process = spawn('python', ['./scripts/apicall.py', req.query.id]);
-        process.stdout.on('data', function(data) { 
-          console.log(data.toString()); 
-        }) 
-        
+       
         //Check task status 
         Task.find({id: req.query.id}, (err, arr) => {
           

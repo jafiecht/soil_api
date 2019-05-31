@@ -1,8 +1,8 @@
 #First, we import the task id provided from the node script
 ############################################################################
 import sys
-#taskID = sys.argv[1]
-taskID = '5c5fc9c9-c664-484d-9c2e-468d269527f2'
+taskID = sys.argv[1]
+#taskID = '5c5fc9c9-c664-484d-9c2e-468d269527f2'
 
 
 #Maybe return something to the script, so it knows things are running?
@@ -60,18 +60,33 @@ subprocess.call('mkdir ' + data['id'] + '/topo/curvatures', shell=True)
 import root
 response = root.validate_predict(data)
 
-print('\n   Response: ', response)
+#Update the task document
+if response['status'] == 400:
+  task['status'] = 'invalid input'
+  task['message'] = response['message']
 
-#tasks.update_one({'id': taskID}, {"$set": task}, upsert=False)
+elif response['status'] == 500:
+  task['status'] = 'server error'
+  task['message'] = response['message']
+
+elif response['status'] == 200:
+  task['status'] = 'complete'
+  task['message'] = response['message']
+  task['scores'] = response['scores']
+  task['bounds'] = response['bounds']
+  task['jpgPath'] = task['id'] + '.jpg'
+  task['tifPath'] = task['id'] + '.tif'
+
+else:
+  task['status'] = 'server error'
+  task['message'] = 'server error'
+  
+tasks.update_one({'id': taskID}, {"$set": task}, upsert=False)
+
 
 #Remove process directory
 if os.path.isdir(data['id']):
-  shutil.rmtree( data['id'])
-
-
-#import json
-#rawInput = open('data/apicall/sparse_object.json')
-#data = json.load(rawInput)
+  shutil.rmtree(data['id'])
 
 
 

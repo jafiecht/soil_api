@@ -105,11 +105,11 @@ def validate_predict(inputObject):
   #############################################################
   print('\n - Exporting prediction')
   start = time.time()
-  try:
-    raster_shape, geotrans, proj = stack.template(topo_data, inputObject['id'])
-    export_functions.output_tif(predictions, raster_shape, geotrans, proj, inputObject['id'])
-  except:
-    return {'status': 500, 'message': 'Server failure while writing predictions to file'}
+  #try:
+  raster_shape, geotrans, proj = stack.template(topo_data, inputObject['id'])
+  bounds = export_functions.output_tif(predictions, raster_shape, geotrans, proj, inputObject['id'])
+  #except:
+    #return {'status': 500, 'message': 'Server failure while writing predictions to file'}
   print('   Process time: ', time.time() - start)
 
   #Clean up temporary files  
@@ -126,7 +126,7 @@ def validate_predict(inputObject):
   #Show prediction
   #############################################################
   print('\n - Done')
-  return {'status': 200, 'file': 'ABC', 'scores': 'scores'}
+  return {'status': 200, 'message': 'prediction made', 'scores': scores, 'bounds': bounds}
 
 #This performs an n-fold cross validation test
 def validate(point_data, topo, buffers):
@@ -150,8 +150,8 @@ def validate(point_data, topo, buffers):
     training_set = list()
     for training_point in training_points:
       obs = list()
-      #for feature in topo:
-        #obs.append(feature[point_data[training_point]['index']])
+      for feature in topo:
+        obs.append(feature[point_data[training_point]['index']])
       for buffer_feature in training_buffers:
         obs.append(buffers[buffer_feature][point_data[training_point]['index']])
       obs.append(point_data[training_point]['value'])
@@ -161,8 +161,8 @@ def validate(point_data, topo, buffers):
     #############################################################
     testing_set = list()
     obs = list()
-    #for feature in topo:
-      #obs.append(feature[point_data[test_point]['index']])
+    for feature in topo:
+      obs.append(feature[point_data[test_point]['index']])
     for buffer_feature in training_buffers:
       obs.append(buffers[buffer_feature][point_data[test_point]['index']])
     testing_set.append(obs)
