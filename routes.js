@@ -33,8 +33,8 @@ module.exports = (app) => {
        
             //Send email to user.
             emailUser(req.body.email, taskID);
-
-            //Return Success 
+ 
+           //Return Success 
             return res.status(200).send({
               id: taskID,
             });
@@ -74,6 +74,13 @@ module.exports = (app) => {
 
       //Is the taskID a string?
       if (typeof req.query.id === 'string') {
+        //Start Python process
+        console.log('Running')
+        var spawn = require("child_process").spawn;
+        var process = spawn('python', ['./scripts/apicall.py', req.query.id]);
+        process.stdout.on('data', function(data) { 
+          console.log(data.toString()); 
+        }) 
         
         //Check task status 
         Task.find({id: req.query.id}, (err, arr) => {
@@ -86,6 +93,7 @@ module.exports = (app) => {
 
               //Completed
               if (arr[0].status === 'complete') {
+
                 return res.status(200).send(arr[0]);
             
               //Incomplete
