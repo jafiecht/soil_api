@@ -21,7 +21,7 @@ def getDEM(taskID):
 
   #Import the tile extent file, then convert to a geodataframe
   #################################################################
-  extents = pd.read_csv('./boundaries.csv', sep=",", header=None, names=['path', 'geometry'])
+  extents = pd.read_csv('./scripts/boundaries.csv', sep=",", header=None, names=['path', 'geometry'])
   extents['geometry'] = extents['geometry'].apply(json.loads)
   extents['geometry'] = extents['geometry'].apply(shapely.geometry.Polygon)
   extents = gpd.GeoDataFrame(extents, geometry='geometry') 

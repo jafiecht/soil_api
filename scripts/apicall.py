@@ -26,6 +26,14 @@ data = {
   'id': task['id']  
 }
 
+##################TESTING######################################
+task['TEST'] = 'This was done 5 seconds after call, more or less';
+#import time
+#time.sleep(5)
+tasks.update_one({'id': taskID}, {"$set": task}, upsert=False)
+
+
+
 #Convert polygon coords to float
 for fIndex, feature in enumerate(data['boundary']['features']):
   data['boundary']['features'][fIndex]['properties'] = {}
@@ -50,6 +58,7 @@ import subprocess
 import os
 import shutil
 #Make the process directory
+subprocess.call('mkdir ', shell=True)
 subprocess.call('mkdir ' + data['id'] + '/', shell=True)
 subprocess.call('mkdir ' + data['id'] + '/rootdata', shell=True)
 subprocess.call('mkdir ' + data['id'] + '/topo', shell=True)
@@ -82,7 +91,7 @@ else:
   task['message'] = 'server error'
   
 tasks.update_one({'id': taskID}, {"$set": task}, upsert=False)
-
+print(response['status'])
 
 #Remove process directory
 if os.path.isdir(data['id']):

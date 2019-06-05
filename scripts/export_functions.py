@@ -15,8 +15,8 @@ def output_tif(predictions, shape, geotrans, proj, taskID):
   prediction_array = list()
 
   unclipped_filename = taskID + '/unclipped.tif'
-  tif_filename = './../public/' + taskID + '.tif'
-  jpg_filename = './../public/' + taskID + '.jpg'
+  tif_filename = './public/' + taskID + '.tif'
+  jpg_filename = './public/' + taskID + '.jpg'
 
   #Reshape the predictions into the output array
   for i in range(shape[0]):

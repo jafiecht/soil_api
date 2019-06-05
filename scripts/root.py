@@ -26,7 +26,7 @@ def validate_predict(inputObject):
  
   #Validate user input
   #############################################################
-  print('\n - Validating user input')
+  #print('\n - Validating user input')
   start = time.time()
   try:
     status = input_checker.check(inputObject)
@@ -34,11 +34,11 @@ def validate_predict(inputObject):
       return {'status': 400, 'message': status}
   except:
     return {'status': 500, 'message': 'Server failure while checking inputs'}
-  print('   Process time: ', time.time() - start)
+  #print('   Process time: ', time.time() - start)
 
   #Select raster tiles with field boundary
   #############################################################
-  print('\n - Downloading elevation data')
+  #print('\n - Downloading elevation data')
   start = time.time()
   try:
     status = tile_selector.getDEM(inputObject['id'])
@@ -46,86 +46,86 @@ def validate_predict(inputObject):
       return {'status': 400, 'message': status}
   except:
     return {'status': 500, 'message': 'Server failure while retrieving elevation data'}
-  print('   Process time: ', time.time() - start)
+  #print('   Process time: ', time.time() - start)
 
   #Calculate topographic derivatives
   #############################################################
-  print('\n - Calculating slopes and curvatures')
+  #print('\n - Calculating slopes and curvatures')
   start = time.time()
   try:
     curvatures.generate_curvatures(inputObject['id'])
     topo_data = stack.return_topo(inputObject['id'])
   except:
     return {'status': 500, 'message': 'Server failure while calculating topographic derivatives'}
-  print('   Process time: ', time.time() - start)
+  #print('   Process time: ', time.time() - start)
 
   #Create rasterize the shapefile points
   #############################################################
-  print('\n - Rasterizing point data')
+  #print('\n - Rasterizing point data')
   start = time.time()
   try:
     rasterizer.rasterize(inputObject['id'])
     point_data = stack.return_points(inputObject['id'])
   except:
     return {'status': 500, 'message': 'Server failure while rasterizing point data'}
-  print('   Process time: ', time.time() - start)
+  #print('   Process time: ', time.time() - start)
 
   #Make buffer distance layers for each known point.
   #############################################################
-  print('\n - Creating buffer layers')
+  #print('\n - Creating buffer layers')
   start = time.time()
   try:
     buffers.make_buffers(inputObject['id'])
     buffer_data = stack.return_buffers(inputObject['id'])
   except:
     return {'status': 500, 'message': 'Server failure while creating point buffer data'}
-  print('   Process time: ', time.time() - start)
+  #print('   Process time: ', time.time() - start)
 
   #Test predictions
   #############################################################
-  print('\n - Testing model')
+  #print('\n - Testing model')
   start = time.time()
   try:
     scores = validate(point_data, topo_data, buffer_data)
   except:
     return {'status': 500, 'message': 'Server failure while testing predictions'}
-  print('   Process time: ', time.time() - start)
+  #print('   Process time: ', time.time() - start)
 
   #Make master prediction
   #############################################################
-  print('\n - Making final prediction')
+  #print('\n - Making final prediction')
   start = time.time()
   try:
     predictions = map_predictions(point_data, topo_data, buffer_data)
   except:
     return {'status': 500, 'message': 'Server failure while making predictions'}
-  print('   Process time: ', time.time() - start)
+  #print('   Process time: ', time.time() - start)
 
   #Get Template Data and write data out
   #############################################################
-  print('\n - Exporting prediction')
+  #print('\n - Exporting prediction')
   start = time.time()
-  #try:
-  raster_shape, geotrans, proj = stack.template(topo_data, inputObject['id'])
-  bounds = export_functions.output_tif(predictions, raster_shape, geotrans, proj, inputObject['id'])
-  #except:
-    #return {'status': 500, 'message': 'Server failure while writing predictions to file'}
-  print('   Process time: ', time.time() - start)
+  try:
+    raster_shape, geotrans, proj = stack.template(topo_data, inputObject['id'])
+    bounds = export_functions.output_tif(predictions, raster_shape, geotrans, proj, inputObject['id'])
+  except:
+    return {'status': 500, 'message': 'Server failure while writing predictions to file'}
+  #print('   Process time: ', time.time() - start)
 
   #Clean up temporary files  
   #############################################################
-  print('\n - Deleting files')
-  start = time.time()
+  #print('\n - Deleting files')
+  #start = time.time()
   #try:
     #stack.cleanup()
   #except:
     #return {'status': 500, 'message': 'Server failure while removing temporary files'}
-  print('   Process time: ', time.time() - start)
-  print('   Overall: ', time.time() - overall_start)
+  #print('   Process time: ', time.time() - start)
+  #print('   Overall: ', time.time() - overall_start)
   
   #Show prediction
   #############################################################
-  print('\n - Done')
+  #print('\n - Done')
   return {'status': 200, 'message': 'prediction made', 'scores': scores, 'bounds': bounds}
 
 #This performs an n-fold cross validation test
@@ -180,11 +180,11 @@ def validate(point_data, topo, buffers):
 
   scores = metrics.generate_metrics(value_pairs)
 
-  print('     R2 Score: ' + str(scores[0]))  
-  print('     RMSE: ' + str(scores[1]))  
-  print('     ME: ' + str(scores[2]))  
-  print('     MAE: ' + str(scores[3]))  
-  print('   test: ', {'R2': scores[0], 'RMSE': scores[1], 'ME': scores[2], 'MAE': scores[3]})
+  #print('     R2 Score: ' + str(scores[0]))  
+  #print('     RMSE: ' + str(scores[1]))  
+  #print('     ME: ' + str(scores[2]))  
+  #print('     MAE: ' + str(scores[3]))  
+  #print('   test: ', {'R2': scores[0], 'RMSE': scores[1], 'ME': scores[2], 'MAE': scores[3]})
   return {'R2': scores[0], 'RMSE': scores[1], 'ME': scores[2], 'MAE': scores[3]}
   
 

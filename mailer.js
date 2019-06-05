@@ -1,33 +1,48 @@
 const nodemailer = require('nodemailer');
+const { google } = require('googleapis');
 const keys = require('./keys');
-
-const auth = {
-  type: 'OAuth2',
-  user: keys.smtpUser,
-  clientId: keys.smtpClientId,
-  clientSecret: keys.smtpClientSecret,
-  refreshToken: keys.smtpRefreshToken
-};
-
-const transporter = nodemailer.createTransport({
-  host: keys.smtpHost,
-  port: keys.smtpPort,
-  secure: true,
-  auth: auth
-});
 
 module.exports = {
   //General function for sending email messages
   sendMail: async (mailParams) => {
-    const mailOptions = {
-      from: 'infield.advantage.support@lthia.org',
+ 
+    const OAuth2 = google.auth.OAuth2;
+
+    const oauth2Client = new OAuth2(
+      keys.clientId,
+      keys.clientSecret,
+      "https://developers.google.com/oauthplayground"
+    );
+    
+    oauth2Client.setCredentials({
+      refresh_token: keys.refreshToken,
+    });
+    
+    const tokens =  await oauth2Client.refreshAccessToken();
+    const accessToken = tokens.credentials.access_token;
+    
+
+    const smtpTransport = nodemailer.createTransport({
+      service: keys.service,
+      auth: {
+        type: keys.type,
+        user: keys.user,
+        clientId: keys.clientId,
+        clientSecret: keys.clientSecret,
+        refreshToken: keys.refreshToken,
+        accessToken: accessToken
+      }
+    });
+    
+   const mailOptions = {
+      from: keys.user,
       to: mailParams.to,
       subject: mailParams.subject,
       text: mailParams.text,
       html: mailParams.html,
     };
 
-    transporter.sendMail(mailOptions, (err, res) => {
+    smtpTransport.sendMail(mailOptions, (err, res) => {
       if (err) {
         return console.log(err);
       } else {

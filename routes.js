@@ -31,25 +31,39 @@ module.exports = (app) => {
           //Was there an error while saving?
           if (!err) {
             var spawn = require("child_process").spawn;
-            var process = spawn('python', 
-              ['./scripts/apicall.py', req.query.id], 
-              {
-                detached: true,
-                stdio:'ignore' 
-              }
+            var subprocess = spawn(
+              'python', 
+              ['./scripts/apicall.py', taskID],
+              {shell: true}
             );
+            var serverStatus;
+            subprocess.stdout.on('data', function(data) {
+              serverStatus = data.toString();
+            });
+            subprocess.on('exit', () => {
+              if (serverStatus == 200) {
+                console.log('success');
+                successEmail(req.body.email, taskID);
+              } else if (serverStatus == 400 || serverStatus == 500) {
+                console.log('error');
+                errorEmail(req.body.email, taskID);
+              } else {
+                console.log('else?');
+                errorEmail(req.body.email, taskID);
+              }
+            });
+    
        
             //Send email to user.
-            emailUser(req.body.email, taskID);
+            submissionEmail(req.body.email, taskID);
  
-           //Return Success 
-            return res.status(200).send({
+            //Return Success 
+            res.status(200).send({
               id: taskID,
             });
         
             //Send email to user.
             //emailUser(req.body.email, taskID);
-            console.log('test');
  
           //There was an error while saving.
           } else {
@@ -76,7 +90,8 @@ module.exports = (app) => {
 
 /*-------------------------------------------------------------------------*/
   app.get('/status', (req, res) => {
-   
+    console.log('/status');   
+
     //Was a taskID provided? 
     if (req.query.id) {
 
@@ -85,7 +100,7 @@ module.exports = (app) => {
        
         //Check task status 
         Task.find({id: req.query.id}, (err, arr) => {
-          
+
           //Only one result found with no errors
           if (!err) {
           
@@ -141,7 +156,7 @@ function pruneData() {
 };
 
 
-function emailUser(email, TaskID) {
+function submissionEmail(email, TaskID) {
   mailParams = {
     to: email,
     subject: 'Interpolation Request Submitted',
@@ -156,11 +171,35 @@ function emailUser(email, TaskID) {
   sendMail(mailParams);
 };
 
+function successEmail(email, TaskID) {
+  mailParams = {
+    to: email,
+    subject: 'Interpolation Request Completed',
+    text: `Hello there! Your interpolation request has been completed. Please return
+          to the interpolation webtool to view the results. Your request ID is: 
+          ${TaskID}. All requests are purged from the server after two days.`,
+    html: `<p><b style='font-size:20px'>Interpolation Request Completed</b><br></p>
+          <p><b>Request ID:</b> ${TaskID}<br></p>
+          <p>Your interpolation request has been completed. Please return
+          to the interpolation webtool to view the results. All requests are 
+          purged from the server after two days.</p>`
+  };
+  sendMail(mailParams);
+};
 
-
-
-
-
-
+function errorEmail(email, TaskID) {
+  mailParams = {
+    to: email,
+    subject: 'Interpolation Request: Error',
+    text: `Hello there! There was an error while processing your request. Please
+          try again at another time. Request ID was: ${TaskID}. All requests are 
+          purged from the server after two days.`,
+    html: `<p><b style='font-size:20px'>Interpolation Request: Error</b><br></p>
+          <p><b>Request ID:</b> ${TaskID}<br></p>
+          <p>There was an error while processing your request. Please try again
+          at another time.</p>`
+  };
+  sendMail(mailParams);
+};
 
 
