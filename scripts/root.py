@@ -84,11 +84,11 @@ def validate_predict(inputObject):
   #Test predictions
   #############################################################
   #print('\n - Testing model')
-  start = time.time()
-  try:
-    scores = validate(point_data, topo_data, buffer_data)
-  except:
-    return {'status': 500, 'message': 'Server failure while testing predictions'}
+  #start = time.time()
+  #try:
+    #scores = validate(point_data, topo_data, buffer_data)
+  #except:
+    #return {'status': 500, 'message': 'Server failure while testing predictions'}
   #print('   Process time: ', time.time() - start)
 
   #Make master prediction
@@ -126,7 +126,7 @@ def validate_predict(inputObject):
   #Show prediction
   #############################################################
   #print('\n - Done')
-  return {'status': 200, 'message': 'prediction made', 'scores': scores, 'bounds': bounds}
+  return {'status': 200, 'message': 'prediction made', 'bounds': bounds}
 
 #This performs an n-fold cross validation test
 def validate(point_data, topo, buffers):

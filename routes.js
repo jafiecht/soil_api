@@ -2,6 +2,7 @@
 /////////////////////////////////////////////////////////////////////////////
 const mongoose = require('mongoose');
 const uuid = require('uuid');
+const fs = require('fs');
 const { checkSchema, validationResult } = require('express-validator/check')
 const { getTaskSchema } = require('./validation')
 const { createTaskObject } = require('./models/taskCreator')
@@ -15,6 +16,7 @@ module.exports = (app) => {
 /*-------------------------------------------------------------------------*/
   app.post('/submit', checkSchema(getTaskSchema()), (req, res) => {
     console.log('submit');
+    pruneData();
  
     //Is the correct information supplied?  
     if (req.body.points && req.body.boundary && req.body.email) {
@@ -90,7 +92,8 @@ module.exports = (app) => {
 
 /*-------------------------------------------------------------------------*/
   app.get('/status', (req, res) => {
-    console.log('/status');   
+    console.log('/status');  
+    pruneData();
 
     //Was a taskID provided? 
     if (req.query.id) {
@@ -152,7 +155,37 @@ module.exports = (app) => {
 //Routes
 /////////////////////////////////////////////////////////////////////////////
 function pruneData() {
-  console.log('prune');
+  Task.where('createdAt').lt(Math.floor((Date.now() / 1000)) - 172800).exec((err, arr) => {
+    if (!err) {
+      arr.forEach((task) => {
+        if (task.status !== 'removed') {
+   
+          //Delete old files from the server
+          fs.unlink('./public/'+task.tifPath, (err)=>{ if(err){console.log('file not found')}})
+          fs.unlink('./public/'+task.jpgPath, (err)=>{ if(err){console.log('file not found')}})
+          fs.unlink('./public/'+task.jpgPath+'.aux.xml', (err)=>{ if(err){console.log('file not found')}})
+      
+          //Update the record
+          const newDoc = {
+            email: task.email,
+            createdAt: task.createdAt,
+            message: task.message,
+            id: task.id,
+            status: 'removed'
+          };
+ 
+          Task.replaceOne(
+            {id: task.id},
+            newDoc, 
+            {omitUndefined: true})
+          .then((res, err) => {
+            if (err) {console.log(err)}
+          })
+
+        }
+      }) 
+    } 
+  });
 };
 
 

@@ -8,6 +8,7 @@ const taskSchema = new Schema({
   email: String,
   jpgPath: String,
   tifPath: String,
+  message: String,
   bounds: [[String]],
   points: {
     type: String,

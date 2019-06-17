@@ -5,7 +5,7 @@ module.exports = {
   createTaskObject: (taskID, values) => {
     return new Task({
       id: taskID,
-      createdAt: new Date().toUTCString(),
+      createdAt: String(Math.floor(Date.now() / 1000)),
       status: 'in progress',
       email: values.email,
       jpgPath: null,

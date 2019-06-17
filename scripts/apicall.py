@@ -26,14 +26,6 @@ data = {
   'id': task['id']  
 }
 
-##################TESTING######################################
-task['TEST'] = 'This was done 5 seconds after call, more or less';
-#import time
-#time.sleep(5)
-tasks.update_one({'id': taskID}, {"$set": task}, upsert=False)
-
-
-
 #Convert polygon coords to float
 for fIndex, feature in enumerate(data['boundary']['features']):
   data['boundary']['features'][fIndex]['properties'] = {}
@@ -81,7 +73,7 @@ elif response['status'] == 500:
 elif response['status'] == 200:
   task['status'] = 'complete'
   task['message'] = response['message']
-  task['scores'] = response['scores']
+  #task['scores'] = response['scores']
   task['bounds'] = response['bounds']
   task['jpgPath'] = task['id'] + '.jpg'
   task['tifPath'] = task['id'] + '.tif'
