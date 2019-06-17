@@ -71,10 +71,10 @@ def combined_check(boundary, points):
 def write_out(boundary, points, taskID):
 
   #Write the files out
-  boundary = boundary.to_crs({'init': 'epsg:4326'})
+  #boundary = boundary.to_crs({'init': 'epsg:4326'})
   boundary.to_file(taskID + '/rootdata/boundary.shp')
   
-  points = points.to_crs({'init': 'epsg:4326'})
+  #points = points.to_crs({'init': 'epsg:4326'})
   points.to_file(taskID + '/rootdata/points.shp')
 
 

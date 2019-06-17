@@ -14,6 +14,7 @@ def output_tif(predictions, shape, geotrans, proj, taskID):
   prediction_list = predictions
   prediction_array = list()
 
+  utm_filename = taskID + '/utm.tif'
   unclipped_filename = taskID + '/unclipped.tif'
   tif_filename = './public/' + taskID + '.tif'
   jpg_filename = './public/' + taskID + '.jpg'
@@ -31,19 +32,21 @@ def output_tif(predictions, shape, geotrans, proj, taskID):
   x_pixels = shape[1]
   y_pixels = shape[0]
   driver = gdal.GetDriverByName('GTiff')
-  dataset = driver.Create(unclipped_filename, x_pixels, y_pixels, 1, gdal.GDT_Float32)
+  dataset = driver.Create(utm_filename, x_pixels, y_pixels, 1, gdal.GDT_Float32)
   dataset.GetRasterBand(1).WriteArray(band)
   dataset.SetGeoTransform(geotrans)
   dataset.SetProjection(proj)
   dataset.FlushCache()
   dataset = None
- 
-  if os.path.exists(jpg_filename):
-    os.remove(jpg_filename)
 
+  #Reproject to WGS84
+  subprocess.call('gdalwarp -q -t_srs EPSG:4326 ' + utm_filename + ' ' + unclipped_filename, shell=True)
+  subprocess.call('rm ' + utm_filename, shell=True)  
+ 
   #Get the bounds of the unclipped raster
   bounds = GetCornerCoordinates(unclipped_filename)
 
+  #Create the jpg of the data
   subprocess.call('gdal_translate -of JPEG -scale -q ' + unclipped_filename + ' ' + jpg_filename , shell=True)
 
  

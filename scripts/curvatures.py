@@ -22,12 +22,7 @@ def generate_curvatures(taskID):
   resolution = meta['transform'][1]
   
   #Set the neighborhoods to generate for
-  #neighborhoods = [5, 55, 115]
-  neighborhoods = [3, 5]
-  
-  #Remove existing curvature sets and remake
-  shutil.rmtree(outfp)
-  os.makedirs(outfp)
+  neighborhoods = [5, 25, 55]
   
   #For every neighborhood size, loop through and create maps
   for neighborhood in neighborhoods:
